@@ -1,2 +1,2 @@
 # SwitchTracker
-Tracks the stock of mechanical switches from various vendors.
+Tracks the stocks of mechanical switches from various vendors.
