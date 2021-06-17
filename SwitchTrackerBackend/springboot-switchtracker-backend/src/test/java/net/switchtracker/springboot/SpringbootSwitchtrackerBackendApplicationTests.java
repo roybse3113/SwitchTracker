@@ -1,0 +1,13 @@
+package net.switchtracker.springboot;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+
+@SpringBootTest
+class SpringbootSwitchtrackerBackendApplicationTests {
+
+	@Test
+	void contextLoads() {
+	}
+
+}
