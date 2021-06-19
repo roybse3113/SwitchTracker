@@ -9,6 +9,7 @@ import org.jsoup.select.Elements;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -19,18 +20,12 @@ public class Parser {
     private String baseURL;
     public Document currentDoc;
     
+
     /*
      * Constructor that initializes the base URL and loads the document produced
      * from that URL
      */
     public Parser() {
-        this.baseURL = "https://novelkeys.xyz/collections/switches";
-        try {
-            this.currentDoc = Jsoup.connect(this.baseURL).get();
-            //System.out.println(this.currentDoc);
-        } catch (IOException e) {
-            // System.out.println("Could not get the corgis :(");
-        }
     }
 
     public Parser(String url) {
@@ -48,10 +43,10 @@ public class Parser {
      * Creates article map to be a mapping of article titles to url from our current
      * doc
      */
-    public HashMap<Integer,String> getArticles(HashMap<Switch,String> allSwitches, HashMap<String,String> articleMap, HashMap<Integer,String> links) {
-        Pattern p = Pattern.compile("\\/collections/switches\\?page=(.*)");
+    public LinkedHashMap<Integer,String> getArticles(String baseURL, LinkedHashMap<Switch,String> allSwitches, LinkedHashMap<String,String> articleMap, LinkedHashMap<Integer,String> links) {
+        Pattern p = Pattern.compile("\\/collections\\/switches\\?page=(\\d{1})");
         Matcher m;
-        HashMap<Integer,String> newLinks = new HashMap<Integer,String>();
+        LinkedHashMap<Integer,String> newLinks = new LinkedHashMap<Integer,String>();
         Elements articleElements = this.currentDoc.select("a"); // gets all elements of type article
         for (Element article : articleElements) {
             Elements aTag = article.select("a"); // links come in <a> tags typically
@@ -66,7 +61,9 @@ public class Parser {
                 String articleTitle = a.text();
                 
                 m = p.matcher(articleURL);
+                //Checks for multiple pages
                 if (m.find()) {
+                    System.out.println(m.group(1));
                     int pageNumber = Integer.parseInt(m.group(1));
 //                    System.out.println(pageNumber);
                     if (!links.containsKey(pageNumber)) {
@@ -74,9 +71,26 @@ public class Parser {
                     }
                 }
                 
+              //Adds the pages for each switch
                 if (articleURL.contains("collections/switches/")) {
-                    if (!allSwitches.containsValue("https://novelkeys.xyz" + articleURL)) {
-                        allSwitches.put(new Switch(articleTitle), "https://novelkeys.xyz" + articleURL);
+                    System.out.println(articleURL);
+                    if (!allSwitches.containsValue(baseURL + articleURL)) {
+                        Pattern pRegularPrice = Pattern.compile("(.*)Regular");
+                        Pattern pPrice = Pattern.compile("(.*)([^A-z\\s\\d][\\\\\\^]?)\\d*([^A-z\\s\\d][\\\\\\^]?)\\d*");
+                        
+                        //Accounts for case when title contains a numeric price or 'Regular Price' for primekb
+                        m = pRegularPrice.matcher(articleTitle);
+                        if (m.find()) {
+                            articleTitle = m.group(1).trim();
+                        } else {
+                            m = pPrice.matcher(articleTitle);
+                            if (m.find()) {
+                                articleTitle = m.group(1).trim();
+                            }
+                        }
+//                        
+                        
+                        allSwitches.put(new Switch(articleTitle), baseURL + articleURL);
                     }
 //                    articleMap.put(articleTitle, "https://novelkeys.xyz" + articleURL);
 //                    allSwitches.put(articleTitle, new Switch(articleTitle));
@@ -168,11 +182,6 @@ public class Parser {
                             
                             sub.setInStock(!currSwitch.contains("Sold out"));
 //                            System.out.println("In Stock?: " + sub.getStockStatus());
-                            
-                            
-                            //HERE WE NEED TO ADD AGAIN
-                            
-                            
 //                            s.setSubSwitches(sub);
                         } else {
                             //If at any point a sub-switch for some count is in stock, set it as in stock
