@@ -24,11 +24,11 @@ public class SpringbootSwitchtrackerBackendApplication implements CommandLineRun
 	
 	@Override
 	public void run(String... args) throws Exception {
-//		this.switchRepository.save(new Switch("Gateron Brown", 0.65, false));
-//		this.switchRepository.save(new Switch("Gateron Red", 0.60, true));
 		SwitchParser parse = new SwitchParser();
 		for (Entry<Switch, String> entry : parse.getAllSwitches().entrySet()) {
-			this.switchRepository.save(entry.getKey());
+			Switch s = entry.getKey();
+			s.setURL(entry.getValue());
+			this.switchRepository.save(s);
 		}
 	}
 
