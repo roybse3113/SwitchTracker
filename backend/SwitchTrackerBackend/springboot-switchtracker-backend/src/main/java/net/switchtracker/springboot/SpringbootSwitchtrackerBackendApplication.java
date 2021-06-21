@@ -2,6 +2,8 @@ package net.switchtracker.springboot;
 
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -16,7 +18,14 @@ import net.switchtracker.springboot.repository.SwitchRepository;
 public class SpringbootSwitchtrackerBackendApplication implements CommandLineRunner{
 
 	public static void main(String[] args) {
-		SpringApplication.run(SpringbootSwitchtrackerBackendApplication.class, args);
+		Timer t = new Timer();
+		
+		t.scheduleAtFixedRate(new TimerTask() {
+			public void run() {
+				SpringApplication.run(SpringbootSwitchtrackerBackendApplication.class, args);
+			}
+		}, 0, 15000);
+		
 	}
 
 	@Autowired
@@ -24,6 +33,7 @@ public class SpringbootSwitchtrackerBackendApplication implements CommandLineRun
 	
 	@Override
 	public void run(String... args) throws Exception {
+		
 		SwitchParser parse = new SwitchParser();
 		for (Entry<Switch, String> entry : parse.getAllSwitches().entrySet()) {
 			Switch s = entry.getKey();
